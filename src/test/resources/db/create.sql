@@ -1,0 +1,6 @@
+CREATE TABLE User
+(
+    id BIGINT NOT NULL,
+    email VARCHAR NOT NULL,
+    PRIMARY KEY (id)
+);
