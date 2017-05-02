@@ -9,27 +9,18 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
- * Created by Andrew on 01.05.2017.
+ * Created by Andrew on 02.05.2017.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = TestAppConfig.class)
-public class JdbcUserRepositoryTest {
+public class JdbcTemplateUserRepositoryTest {
 
     @Autowired
-    @Qualifier("jdbcUserRepository")
+    @Qualifier("jdbcTemplateUserRepository")
     private UserRepository userRepository;
-
-    @Test(expected = NullPointerException.class)
-    public void findByEmailNullEmail() {
-        userRepository.findByEmail(null);
-    }
 
     @Test
     public void findByEmailSingleResult() {
@@ -37,18 +28,5 @@ public class JdbcUserRepositoryTest {
         User expectedUser = User.builder().id(1L).email(email).build();
 
         assertEquals(expectedUser, userRepository.findByEmail(email).get(0));
-    }
-
-    @Test
-    public void findByEmailMultipleResults() {
-        final String email = "user2@gmail.com";
-        List<User> expectedUsers = new ArrayList<>(2);
-        expectedUsers.add(User.builder().id(2L).email(email).build());
-        expectedUsers.add(User.builder().id(3L).email(email).build());
-
-        List<User> actualUsers = userRepository.findByEmail(email);
-
-        assertTrue(expectedUsers.containsAll(actualUsers));
-        assertTrue(actualUsers.containsAll(expectedUsers));
     }
 }
