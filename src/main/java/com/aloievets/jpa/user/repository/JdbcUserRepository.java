@@ -9,8 +9,10 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
@@ -20,10 +22,56 @@ import static org.apache.commons.lang3.Validate.notNull;
 @Repository
 public class JdbcUserRepository implements UserRepository {
 
+    private static final String INSERT_QUERY = "INSERT INTO User (id, email) VALUES (?, ?)";
+    private static final String FIND_BY_ID = "SELECT id, email FROM User WHERE id = ?";
     private static final String FIND_BY_EMAIL_QUERY = "SELECT id, email FROM User WHERE email = ?";
 
     @Autowired
     private DataSource dataSource;
+
+    @Override
+    @SneakyThrows
+    public void insert(User user) {
+        notNull(user);
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = dataSource.getConnection();
+            preparedStatement = connection.prepareStatement(INSERT_QUERY);
+            preparedStatement.setLong(1, user.getId());
+            preparedStatement.setString(2, user.getEmail());
+            preparedStatement.executeUpdate();
+        } finally {
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+
+    @Override
+    @SneakyThrows
+    public Optional<User> find(long id) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = dataSource.getConnection();
+            preparedStatement = connection.prepareStatement(FIND_BY_ID);
+            preparedStatement.setLong(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            User user = null;
+            if (resultSet.next()) {
+                user = toUser(resultSet);
+            }
+
+            return Optional.ofNullable(user);
+        } finally {
+            close(preparedStatement, connection);
+        }
+    }
 
     @Override
     @SneakyThrows
@@ -38,22 +86,29 @@ public class JdbcUserRepository implements UserRepository {
             ResultSet resultSet = preparedStatement.executeQuery();
             List<User> users = new LinkedList<>();
             while (resultSet.next()) {
-                users.add(
-                        User
-                                .builder()
-                                .id(resultSet.getLong("id"))
-                                .email(resultSet.getString("email"))
-                                .build()
-                );
+                users.add(toUser(resultSet));
             }
+
             return users;
         } finally {
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-            if (connection != null) {
-                connection.close();
-            }
+            close(preparedStatement, connection);
+        }
+    }
+
+    private User toUser(ResultSet resultSet) throws SQLException {
+        return User
+                .builder()
+                .id(resultSet.getLong("id"))
+                .email(resultSet.getString("email"))
+                .build();
+    }
+
+    private void close(PreparedStatement preparedStatement, Connection connection) throws SQLException {
+        if (preparedStatement != null) {
+            preparedStatement.close();
+        }
+        if (connection != null) {
+            connection.close();
         }
     }
 }
