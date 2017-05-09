@@ -23,9 +23,4 @@ public class TestAppConfig {
                 .addScript("db/insert.sql")
                 .build();
     }
-
-    @Bean
-    String helloBean() {
-        return "HEllo World";
-    }
 }

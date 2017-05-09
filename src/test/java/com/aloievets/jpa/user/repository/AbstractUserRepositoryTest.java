@@ -32,6 +32,21 @@ abstract public class AbstractUserRepositoryTest {
 
         assertTrue(actualUser.isPresent());
         actualUser.ifPresent(user -> assertEquals(expectedUser, user));
+
+        userRepository.delete(id);
+    }
+
+    @Test
+    public void update() {
+        final long id = 4;
+        User user = userRepository.find(id).get();
+        String oldEmail = user.getEmail();
+        String newEmail = oldEmail + "a";
+
+        user.setEmail(newEmail);
+        userRepository.update(user);
+
+        assertEquals(user, userRepository.find(id).get());
     }
 
     @Test

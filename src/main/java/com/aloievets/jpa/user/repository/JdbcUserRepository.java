@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.Validate.notEmpty;
 import static org.apache.commons.lang3.Validate.notNull;
 
 /**
@@ -23,6 +24,8 @@ import static org.apache.commons.lang3.Validate.notNull;
 public class JdbcUserRepository implements UserRepository {
 
     private static final String INSERT_QUERY = "INSERT INTO User (id, email) VALUES (?, ?)";
+    private static final String UPDATE_QUERY = "UPDATE User SET email = ? WHERE id = ?";
+    private static final String DELETE_QUERY = "DELETE FROM User WHERE id = ?";
     private static final String FIND_BY_ID = "SELECT id, email FROM User WHERE id = ?";
     private static final String FIND_BY_EMAIL_QUERY = "SELECT id, email FROM User WHERE email = ?";
 
@@ -41,6 +44,29 @@ public class JdbcUserRepository implements UserRepository {
             preparedStatement = connection.prepareStatement(INSERT_QUERY);
             preparedStatement.setLong(1, user.getId());
             preparedStatement.setString(2, user.getEmail());
+            preparedStatement.executeUpdate();
+        } finally {
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+
+    @Override
+    @SneakyThrows
+    public void update(User user) {
+        notNull(user);
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = dataSource.getConnection();
+            preparedStatement = connection.prepareStatement(UPDATE_QUERY);
+            preparedStatement.setString(1, user.getEmail());
+            preparedStatement.setLong(2, user.getId());
             preparedStatement.executeUpdate();
         } finally {
             if (preparedStatement != null) {
@@ -76,7 +102,7 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     @SneakyThrows
     public List<User> findByEmail(String email) {
-        notNull(email);
+        notEmpty(email);
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         try {
@@ -92,6 +118,26 @@ public class JdbcUserRepository implements UserRepository {
             return users;
         } finally {
             close(preparedStatement, connection);
+        }
+    }
+
+    @Override
+    @SneakyThrows
+    public void delete(long id) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = dataSource.getConnection();
+            preparedStatement = connection.prepareStatement(DELETE_QUERY);
+            preparedStatement.setLong(1, id);
+            preparedStatement.executeUpdate();
+        } finally {
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
         }
     }
 

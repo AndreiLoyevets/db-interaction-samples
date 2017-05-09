@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.Validate.notEmpty;
 import static org.apache.commons.lang3.Validate.notNull;
 
 /**
@@ -20,6 +21,8 @@ import static org.apache.commons.lang3.Validate.notNull;
 public class JdbcTemplateUserRepository implements UserRepository {
 
     private static final String INSERT_QUERY = "INSERT INTO User (id, email) VALUES (?, ?)";
+    private static final String DELETE_QUERY = "DELETE FROM User WHERE id = ?";
+    private static final String UPDATE_QUERY = "UPDATE User SET email = ? WHERE id = ?";
     private static final String FIND_BY_ID = "SELECT id, email FROM User WHERE id = ?";
     private static final String FIND_BY_EMAIL_QUERY = "SELECT id, email FROM User WHERE email = ?";
 
@@ -43,8 +46,19 @@ public class JdbcTemplateUserRepository implements UserRepository {
 
     @Override
     public List<User> findByEmail(String email) {
-        notNull(email);
+        notEmpty(email);
         return jdbcTemplate.query(FIND_BY_EMAIL_QUERY, new Object[]{email}, this::toUser);
+    }
+
+    @Override
+    public void delete(long id) {
+        jdbcTemplate.update(DELETE_QUERY, id);
+    }
+
+    @Override
+    public void update(User user) {
+        notNull(user);
+        jdbcTemplate.update(UPDATE_QUERY, user.getEmail(), user.getId());
     }
 
     private User toUser(ResultSet resultSet, int row) throws SQLException {
