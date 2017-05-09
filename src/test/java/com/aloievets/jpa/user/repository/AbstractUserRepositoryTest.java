@@ -50,6 +50,17 @@ abstract public class AbstractUserRepositoryTest {
     }
 
     @Test
+    public void delete() {
+        long id = 300;
+        User user = User.builder().id(id).email("ahahaha@gmail.com").build();
+        userRepository.insert(user);
+
+        userRepository.delete(id);
+
+        assertFalse(userRepository.find(id).isPresent());
+    }
+
+    @Test
     public void findById() {
         User expectedUser = User.builder().id(1L).email("user1@gmail.com").build();
 

@@ -2,6 +2,7 @@ package com.aloievets.jpa.user.repository;
 
 import com.aloievets.jpa.user.User;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 

@@ -4,8 +4,8 @@ import com.aloievets.jpa.user.User;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,13 +18,10 @@ import static org.apache.commons.lang3.Validate.notEmpty;
 @Repository
 public class JpaUserRepository implements UserRepository {
 
-    private final EntityManager entityManager;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    public JpaUserRepository() {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("JpaSample");
-        entityManager = emf.createEntityManager();
-    }
-
+    @Transactional
     @Override
     public void insert(User user) {
         entityManager.persist(user);
@@ -48,16 +45,16 @@ public class JpaUserRepository implements UserRepository {
         return users;
     }
 
+    @Transactional
     @Override
     public void delete(long id) {
         Optional<User> user = find(id);
         user.ifPresent(entityManager::remove);
     }
 
+    @Transactional
     @Override
     public void update(User user) {
-        if (!entityManager.contains(user)) {
-            entityManager.persist(user);
-        }
+        entityManager.merge(user);
     }
 }

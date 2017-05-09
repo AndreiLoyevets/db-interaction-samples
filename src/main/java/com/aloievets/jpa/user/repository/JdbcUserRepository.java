@@ -32,8 +32,8 @@ public class JdbcUserRepository implements UserRepository {
     @Autowired
     private DataSource dataSource;
 
-    @Override
     @SneakyThrows
+    @Override
     public void insert(User user) {
         notNull(user);
 
@@ -55,8 +55,8 @@ public class JdbcUserRepository implements UserRepository {
         }
     }
 
-    @Override
     @SneakyThrows
+    @Override
     public void update(User user) {
         notNull(user);
 
@@ -78,8 +78,8 @@ public class JdbcUserRepository implements UserRepository {
         }
     }
 
-    @Override
     @SneakyThrows
+    @Override
     public Optional<User> find(long id) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -99,8 +99,8 @@ public class JdbcUserRepository implements UserRepository {
         }
     }
 
-    @Override
     @SneakyThrows
+    @Override
     public List<User> findByEmail(String email) {
         notEmpty(email);
         Connection connection = null;
@@ -121,8 +121,8 @@ public class JdbcUserRepository implements UserRepository {
         }
     }
 
-    @Override
     @SneakyThrows
+    @Override
     public void delete(long id) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
