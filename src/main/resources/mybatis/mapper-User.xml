@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.apache.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aloievets.jpa.user.repository.MyBatisUserRepository">
+
+    <resultMap id="user" type="com.aloievets.jpa.user.User">
+        <constructor>
+            <idArg column="id" javaType="long"/>
+            <arg column="email" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <select id="find" resultMap="user">
+        <![CDATA[
+            SELECT
+                id,
+                email
+            FROM User
+            WHERE id = #{id}
+        ]]>
+    </select>
+
+    <select id="findByEmail" resultMap="user">
+        <![CDATA[
+            SELECT
+                id,
+                email
+            FROM User
+            WHERE email = #{email}
+        ]]>
+    </select>
+
+    <select id="findByEmails" resultMap="user">
+        <![CDATA[
+            SELECT
+                id,
+                email
+            FROM User
+            WHERE email IN
+        ]]>
+        <foreach item="item" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <update id="update" parameterType="com.aloievets.jpa.user.User">
+        <![CDATA[
+            UPDATE User
+            SET
+                email = #{email}
+            WHERE id = #{id}
+        ]]>
+    </update>
+
+    <insert id="insert" parameterType="com.aloievets.jpa.user.User">
+        <![CDATA[
+            INSERT INTO User
+            (
+                id,
+                email
+            )
+            VALUES
+            (
+                #{id, jdbcType=BIGINT},
+                #{email, jdbcType=VARCHAR}
+            )
+        ]]>
+    </insert>
+
+    <delete id="delete">
+        <![CDATA[
+            DELETE FROM User
+            WHERE id = #{id}
+        ]]>
+    </delete>
+
+</mapper>
